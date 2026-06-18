@@ -369,7 +369,7 @@ if enviar:
 # UI — Detalhamento da Medição (upload → gerar XLSX por cont_id → enviar em lote)
 # ============================================================
 st.markdown("---")
-st.subheader("Detalhamento da Medição")
+st.subheader("Envio do Detalhamento da Medição")
 
 
 def _brl_app(v: float) -> str:
