@@ -16,7 +16,7 @@ from pathlib import Path
 import requests
 import streamlit as st
 
-import relatorio_medicao as rm
+import separar_detalhamento as sd
 
 # ============================================================
 # Caminhos
@@ -355,7 +355,7 @@ if enviar:
 
 
 # ============================================================
-# UI — Detalhamento da Medição (upload → gerar PDFs → enviar em lote)
+# UI — Detalhamento da Medição (upload → gerar XLSX por cont_id → enviar em lote)
 # ============================================================
 st.markdown("---")
 st.subheader("Detalhamento da Medição")
@@ -374,21 +374,21 @@ def _fmt_data(d) -> str:
 
 @st.cache_data(show_spinner=False)
 def _processar_arquivo(nome: str, conteudo: bytes) -> dict:
-    """Gera os relatórios (cacheado por nome+conteúdo para não reprocessar a cada rerun)."""
-    return rm.gerar_relatorios(conteudo)
+    """Gera os blocos .xlsx (cacheado por nome+conteúdo para não reprocessar a cada rerun)."""
+    return sd.gerar_blocos(conteudo)
 
 
 arquivo = None
 if detalhar:
     st.caption(
-        "Envie o arquivo já tratado (somente a aba **Detalhamentos PDF**). "
-        "O front lê o período do cabeçalho, gera **1 relatório PDF por cont_id** "
-        "e envia tudo em **um único lote** ao N8N (cada relatório separado, em Base64)."
+        "Envie o **Banco de Dados Sillion** (aba **Faturamento**). "
+        "O front processa **todos os cont_id**, gera **1 arquivo .xlsx por cont_id** "
+        "e envia tudo em **um único lote** ao N8N (cada arquivo separado, em Base64)."
     )
     arquivo = st.file_uploader(
         "Banco de Dados Sillion",
         type=["xlsx"],
-        help="Planilha contendo a aba 'Detalhamentos PDF' com o período no cabeçalho (DATA INICIAL/FINAL).",
+        help="Planilha com a aba 'Faturamento' (período em F2/G2, cabeçalho na linha 5, dados a partir da 6).",
     )
 else:
     st.info(
@@ -402,18 +402,18 @@ if arquivo is not None:
             resultado = _processar_arquivo(arquivo.name, arquivo.getvalue())
 
         periodo = resultado["periodo"]
-        relatorios = resultado["relatorios"]
+        relatorios = resultado["blocos"]
 
         if not relatorios:
             st.warning(
                 "Nenhum cont_id encontrado. Confirme se o arquivo contém a aba "
-                "'Detalhamentos PDF' com os dados a partir do cabeçalho."
+                "'Faturamento' com os dados a partir da linha 6."
             )
         else:
             total_geral = sum(r["total"] for r in relatorios)
             st.markdown(
-                f"**Período:** {_fmt_data(periodo.get('data_inicial'))} a "
-                f"{_fmt_data(periodo.get('data_final'))} · "
+                f"**Período:** {_fmt_data(periodo[0])} a "
+                f"{_fmt_data(periodo[1])} · "
                 f"**{len(relatorios)} relatórios** · "
                 f"**Total geral:** R$ {_brl_app(total_geral)}"
             )
@@ -454,7 +454,7 @@ if arquivo is not None:
                 else:
                     with st.spinner(f"Enviando lote com {len(relatorios)} relatórios ao backend..."):
                         try:
-                            payload = rm.build_lote_payload(
+                            payload = sd.build_lote_payload(
                                 relatorios, periodo, email, empresa_solicitante,
                                 OPCAO_DETALHAMENTO,
                             )
@@ -470,8 +470,8 @@ if arquivo is not None:
                                     st.caption(f"Empresa: {empresa_solicitante}")
                                     st.caption(
                                         "Período: "
-                                        f"{_fmt_data(periodo.get('data_inicial'))} a "
-                                        f"{_fmt_data(periodo.get('data_final'))}"
+                                        f"{_fmt_data(periodo[0])} a "
+                                        f"{_fmt_data(periodo[1])}"
                                     )
                                     st.caption(f"Total geral: R$ {_brl_app(total_geral)}")
                                     st.caption(
