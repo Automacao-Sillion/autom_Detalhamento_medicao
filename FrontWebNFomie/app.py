@@ -263,13 +263,20 @@ empresas = st.multiselect(
 )
 
 st.write("")
+# Envio por email só é permitido quando o faturamento é APENAS TOT.
+# Se VALE estiver presente (sozinho ou junto com TOT), o toggle fica bloqueado.
+pode_email = ("TOT" in empresas) and ("VALE" not in empresas)
 detalhar = st.toggle(
     "Habilitar envio por email",
     value=False,
-    help="Ative para subir o Banco de Dados Sillion (aba 'Detalhamentos PDF'). "
-         "O painel de upload aparece no fim da página e o identificador "
-         f"'{OPCAO_DETALHAMENTO}' é enviado no payload (Download e lote).",
+    disabled=not pode_email,
+    help="Disponível apenas quando o tipo de faturamento é somente TOT. "
+         "Fica bloqueado se VALE estiver selecionado (sozinho ou junto com TOT). "
+         "Ative para subir o Banco de Dados Sillion e enviar o lote ao N8N.",
 )
+detalhar = detalhar and pode_email   # garante desligado quando VALE está presente
+if "VALE" in empresas:
+    st.caption("Envio por email indisponível com **VALE** selecionado — disponível apenas para **TOT**.")
 
 st.write("")
 # Com o envio por email ativo (lote de detalhamento), o Download não se aplica — some.
