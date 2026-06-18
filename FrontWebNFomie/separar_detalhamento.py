@@ -258,10 +258,12 @@ def gerar_blocos(file_bytes):
     return {"periodo": periodo, "blocos": blocos}
 
 
-def build_lote_payload(blocos, periodo, email, empresa, opcao=""):
+def build_lote_payload(blocos, periodo, email, empresa, opcao="", empresas=None):
     """
     Monta o payload do LOTE para o webhook N8N.
     Cada .xlsx fica separado no array `lote`, em Base64.
+    `empresas` = tipo(s) de faturamento selecionado(s) (ex.: ["TOT"]),
+    enviado sempre, independentemente do envio por email.
     """
     import base64
     from datetime import datetime, date
@@ -286,6 +288,7 @@ def build_lote_payload(blocos, periodo, email, empresa, opcao=""):
     return {
         "email": email.strip(),
         "empresa": empresa,
+        "empresas": list(empresas) if empresas else [],
         "tipo": "detalhamento_medicao",
         "opcao": opcao,
         "periodo": {

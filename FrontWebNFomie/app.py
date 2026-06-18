@@ -272,7 +272,11 @@ detalhar = st.toggle(
 )
 
 st.write("")
-enviar = st.button("Download", type="primary", use_container_width=True)
+# Com o envio por email ativo (lote de detalhamento), o Download não se aplica — some.
+if detalhar:
+    enviar = False
+else:
+    enviar = st.button("Download", type="primary", use_container_width=True)
 
 
 # ============================================================
@@ -447,6 +451,8 @@ if arquivo is not None:
                     erros_lote.append(f"Email inválido. Use um endereço @{DOMINIO_PERMITIDO}.")
                 if not empresa_solicitante:
                     erros_lote.append("Selecione a empresa (Sitrack ou Sillion) no topo.")
+                if not empresas:
+                    erros_lote.append("Selecione o tipo de faturamento (TOT e/ou VALE) no topo.")
 
                 if erros_lote:
                     for e in erros_lote:
@@ -456,7 +462,7 @@ if arquivo is not None:
                         try:
                             payload = sd.build_lote_payload(
                                 relatorios, periodo, email, empresa_solicitante,
-                                OPCAO_DETALHAMENTO,
+                                OPCAO_DETALHAMENTO, empresas,
                             )
                             resp = enviar_para_n8n(WEBHOOK_LOTE_URL, payload)
 
