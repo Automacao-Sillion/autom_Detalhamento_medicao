@@ -264,9 +264,9 @@ empresas = st.multiselect(
 
 st.write("")
 detalhar = st.toggle(
-    "Anexar Detalhamento da Medição (cliente específico)",
+    "Habilitar envio por email",
     value=False,
-    help="Ative para subir a planilha tratada (aba 'Detalhamentos PDF'). "
+    help="Ative para subir o Banco de Dados Sillion (aba 'Detalhamentos PDF'). "
          "O painel de upload aparece no fim da página e o identificador "
          f"'{OPCAO_DETALHAMENTO}' é enviado no payload (Download e lote).",
 )
@@ -386,14 +386,14 @@ if detalhar:
         "e envia tudo em **um único lote** ao N8N (cada relatório separado, em Base64)."
     )
     arquivo = st.file_uploader(
-        "Arquivo tratado (.xlsx)",
+        "Banco de Dados Sillion",
         type=["xlsx"],
         help="Planilha contendo a aba 'Detalhamentos PDF' com o período no cabeçalho (DATA INICIAL/FINAL).",
     )
 else:
     st.info(
-        "Ative **Anexar Detalhamento da Medição** no formulário acima para "
-        "subir a planilha tratada e enviar o lote de relatórios."
+        "Ative **Habilitar envio por email** no formulário acima para "
+        "subir o Banco de Dados Sillion e enviar o lote de relatórios."
     )
 
 if arquivo is not None:
