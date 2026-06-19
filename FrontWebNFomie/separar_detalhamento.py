@@ -220,6 +220,7 @@ def construir_bloco(cont_id, linhas, periodo, modelo):
 def gerar_blocos(file_bytes):
     """
     Processa o arquivo enviado e gera 1 .xlsx por CONT ID (em memoria).
+    O periodo usado DENTRO das planilhas vem do cabecalho do arquivo (inalterado).
     Retorna:
     {
       "periodo": (data_inicial, data_final, qtd_dias),

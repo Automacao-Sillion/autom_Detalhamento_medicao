@@ -412,8 +412,15 @@ if arquivo is not None:
         with st.spinner("Lendo a planilha e gerando os relatórios..."):
             resultado = _processar_arquivo(arquivo.name, arquivo.getvalue())
 
-        periodo = resultado["periodo"]
         relatorios = resultado["blocos"]
+
+        # O período que vai no PAYLOAD (string) e na exibição segue a seleção do
+        # formulário, quando informada. As planilhas (.xlsx) NÃO são alteradas —
+        # mantêm o período do próprio arquivo.
+        if data_inicial and data_final:
+            periodo = (data_inicial, data_final, (data_final - data_inicial).days + 1)
+        else:
+            periodo = resultado["periodo"]
 
         if not relatorios:
             st.warning(
@@ -460,6 +467,8 @@ if arquivo is not None:
                     erros_lote.append("Selecione a empresa (Sitrack ou Sillion) no topo.")
                 if not empresas:
                     erros_lote.append("Selecione o tipo de faturamento (TOT e/ou VALE) no topo.")
+                if data_inicial is None or data_final is None:
+                    erros_lote.append("Informe a data inicial e a data final no topo do formulário.")
 
                 if erros_lote:
                     for e in erros_lote:
